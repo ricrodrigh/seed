@@ -1,21 +1,3 @@
-/*********************************************************************
-This is an example for our Monochrome OLEDs based on SSD1306 drivers
- 
-  Pick one up today in the adafruit shop!
-  ------> http://www.adafruit.com/category/63_98
- 
-This example is for a 128x64 size display using I2C to communicate
-3 pins are required to interface (2 I2C and one reset)
- 
-Adafruit invests time and resources providing this open source code,
-please support Adafruit and open-source hardware by purchasing
-products from Adafruit!
- 
-Written by Limor Fried/Ladyada  for Adafruit Industries.
-BSD license, check license.txt for more information
-All text above, and the splash screen must be included in any redistribution
-*********************************************************************/
- 
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
@@ -57,14 +39,17 @@ boolean readingKey = true;
 /***********************************
 ** VALUES FOR THIS SEED COMPONENT **
 ************************************/
-const int MAP_SIZE = 1;
-const String keySet[MAP_SIZE] = {"led1"};
-const int values[MAP_SIZE] = {13};
+const int MAP_SIZE = 3;
+const String keySet[MAP_SIZE] = {"b", "led1", "v"};
+const int values[MAP_SIZE] = {-1, 13, 10};
 
 /*
-   v:{N} - vibrate for N seconds (ex. v:5 will make seed vibrate for 5 seconds)
-   b:{led1}={5} blink pin P five times (ex. b:led1:4)
+  b:{led1}={5} blink pin P five times (ex. b:led1:4, sending only b:4 does nothing since there is no key for b)
+  v:5 (vibrate N times)
 */
+
+const int blinkDuration = 100;
+const int motorPin = 10;
 
 //***********************************
 
@@ -79,12 +64,9 @@ void setup()   {
   // Show image buffer on the display hardware.
   // Since the buffer is intialized with an Adafruit splashscreen
   // internally, this will display the splashscreen.
-  //display.display();
-  //delay(1000);
- 
-  // Clear the buffer.
-  display.clearDisplay();
- 
+  display.display();
+  delay(1000);
+  
   // reserve 10 bytes for the inputString:
   commandKey.reserve(10);
   commandValue.reserve(10);
@@ -92,21 +74,21 @@ void setup()   {
   // initialize serial:
   Serial.begin(9600);
   
-  pinMode(13, OUTPUT);
-  blink("led1");
+  pinMode(13, OUTPUT); //led1
+  blink(13, 3);
+  
+  pinMode(motorPin, OUTPUT); //v
+  
+  // Clear the buffer.
+  display.clearDisplay();
+  printToScreen("");
 }  
  
 void loop() {
  
  if (commandComplete) {
     //printToScreen(commandKey + ":" + commandValue);
-    
-    if(containsNestedCommand(commandValue)) {
-      String nestedKey = getNestedKey(commandValue);
-      String nestedValue = getNestedValue(commandValue);
-      Serial.println(nestedKey);
-      Serial.println(nestedValue);
-    }
+    interpretCommand(commandKey, commandValue);
     
     // clear the string:
     commandKey = "";
@@ -135,26 +117,48 @@ void loop() {
   }
 }
 
+void interpretCommand(String commandKey, String commandValue) {
+  Serial.print("Interpreting: ");
+  Serial.println(commandKey + ":" + commandValue);
+  int key = get(commandKey);
+  
+  Serial.print("Key: ");
+  Serial.println(key);
+  switch (key) {
+    case 0: //b
+      if(containsNestedCommand(commandValue)){
+        interpretCommand(getNestedKey(commandValue),getNestedValue(commandValue));
+      } // No else, only provide else if both behavior are accepted
+      break;
+    case 1: //led1
+      blink(values[key], commandValue.toInt());
+      break;
+    case 2: //v
+      vibrate(commandValue.toInt());
+      break;
+  }
+}
+
 boolean containsNestedCommand(String command) {
-    return command.indexOf("=") != -1 && command.length() > 2;
+  return command.indexOf("=") != -1 && command.length() > 2;
 }
 
 String getNestedKey(String command) {
-    return command.substring(0, command.indexOf("="));
+  return command.substring(0, command.indexOf("="));
 }
 
 String getNestedValue(String command) {
-    return command.substring(command.indexOf("=") + 1);
+  return command.substring(command.indexOf("=") + 1);
 }
 
 void printToScreen(String inputString) {
-    display.clearDisplay();
-    display.setTextSize(1);
-    display.setTextColor(WHITE);
-    display.setCursor(0,0);
-    display.println(inputString);
-    printFreeMemory();
-    display.display();
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(0,0);
+  display.println(inputString);
+  printFreeMemory();
+  display.display();
 }
 
 void printFreeMemory() {
@@ -162,19 +166,17 @@ void printFreeMemory() {
   display.println(freeMemory());
 }
 
-void blink(String led) {
-  int key = get(led);
-  if(key != -1) {
-    int ledPin = values[key];
-    Serial.println("Found pin for " + led + ": " + ledPin);
-    digitalWrite(ledPin, HIGH);
-    delay(100);
-    digitalWrite(ledPin, LOW);
-    delay(100);
-    digitalWrite(ledPin, HIGH);
-    delay(100);
-    digitalWrite(ledPin, LOW);
+void blink(int ledPin, int times) {
+  for(int i = 0; i <= times; i++){
+      digitalWrite(ledPin, HIGH);
+      delay(blinkDuration);
+      digitalWrite(ledPin, LOW);
+      delay(blinkDuration);
   }
+}
+
+void vibrate(int times) {
+  blink(13, times);
 }
 
 int get(String key) {
