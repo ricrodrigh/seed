@@ -13,6 +13,8 @@ class LookupTable
 	public:
 		LookupTable(int mapSize);
 		int getSize();
+		int getValue(const String &key);
+		boolean put(const String &key, int *pValue);
 	private:
 		int _mapSize;
 };

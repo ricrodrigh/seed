@@ -1,5 +1,6 @@
-#include <MemoryFree.h>
 #include <LookupTable.h>
+
+#include <MemoryFree.h>
 
 /*
 Initialize Seed function pointers
@@ -28,22 +29,32 @@ const int values[MAP_SIZE] = {-1, 13, 10};
 const int blinkDuration = 100;
 const int motorPin = 10;
 
-//***********************************
-
 void setup()   {
   // initialize serial:
   Serial.begin(9600);
-  
-  table.blinks();
-  
+    
   // reserve 10 bytes for the inputString:
   commandKey.reserve(10);
   commandValue.reserve(10);
   
   pinMode(13, OUTPUT); //led1
   pinMode(motorPin, OUTPUT); //v
+
+  testLookupTable();
 }  
- 
+  
+void testLookupTable () {
+  Serial.print("Size: ");
+  Serial.println(table.getSize());
+  
+  Serial.print("GetValue: a ");
+  Serial.println(table.getValue("a"));
+  
+  Serial.print("Put: a");
+  int value = 1;
+  Serial.println(table.put("a", &value));
+} 
+
 void loop() {
  
  if (commandComplete) {
