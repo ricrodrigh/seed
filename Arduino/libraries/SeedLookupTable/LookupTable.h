@@ -15,8 +15,18 @@ class LookupTable
 		int getSize();
 		int getValue(const String &key);
 		boolean put(const String &key, int *pValue);
+		boolean put(const String &key);
+
+		void printValues();
 	private:
 		int _mapSize;
+		int _arrayPointer;
+		static const int _defaultValue;
+		String _keySet[];
+		int _values[];
+
+		String _key;
+		int _value;
 };
 
 #endif
