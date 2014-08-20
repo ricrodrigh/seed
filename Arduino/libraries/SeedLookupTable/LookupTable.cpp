@@ -7,60 +7,63 @@
 #include "Arduino.h"
 #include "LookupTable.h"
 
+const int LookupTable::_defaultValue = -1;
+int values_array[10] = {};
+
 LookupTable::LookupTable(int mapSize) {
 	_mapSize = mapSize;
 	_arrayPointer = 0;
-	
-	_value = "SomeVal";
-	_key = -1;
+
+	_key = "SomeKey";	
+	_value = -1;
+
+	_values = values_array;
 }
 
 int LookupTable::getSize() {
+	// Serial.print("Map size: ");
+	// Serial.println(_mapSize);
 	return _mapSize;
 }
 
-int LookupTable::getValue(const String &key) {
-	Serial.print("Get key: ");
-	Serial.println(key);
-	for(int i = 0; i < _mapSize; i++) {
-		Serial.print("\t ");
-		Serial.print(i);
-		Serial.print(":");
-		if(_keySet[i] == key) {
-			return _values[i];
-		}
-	}
-	return _defaultValue;
+String & LookupTable::getKey(String &key) {
+	// Serial.print("Input key: ");
+	// Serial.println(key);
+
+	// Serial.print("Table key: ");
+	// Serial.println(_key);
+	return _key;
 }
 
-void LookupTable::printValues() {
-	Serial.println("Printing values");
-	for(int i = 0; i < _mapSize; i++) {
-		Serial.print("\t ");
-		Serial.print(i);
-		Serial.print(":");
-		int value = _values[i];
-		Serial.println(*value);
-	}
+int LookupTable::getValue() {
+	// Serial.print("Table val: ");
+	// Serial.println(_value);
+	return _value;
 }
 
-boolean LookupTable::put(const String &key, int *pValue) {
-	if(_arrayPointer < _mapSize) {
-		_keySet[_arrayPointer] = key;
-		//_values[_arrayPointer] = *pValue;
-		_arrayPointer = _arrayPointer + 1;
-		return true;
-	}
+int LookupTable::getValue(int index) {
+	int value = _values[index];
+	// Serial.print("-Input index");
+	// Serial.println(index);
+	// Serial.print("- Val in array ");
+	// Serial.println(value);
+	// Serial.print("- Val in array[] ");
+	// Serial.println(_values[index]);
+	return value;
+}
+
+boolean LookupTable::setKey(String &key) {
+	// Serial.print("Input key: ");
+	// Serial.println(key);
+	_key = key;
 	return false;
 }
 
-boolean LookupTable::put(const String &key) {
-	if(_arrayPointer < _mapSize) {
-		_keySet[_arrayPointer] = key;
-		_arrayPointer = _arrayPointer + 1;
-		return true;
-	}
+boolean LookupTable::setValue(int value) {
+	// Serial.print("Input value: ");
+	// Serial.println(value);
+	_value = value;
 	return false;
 }
 
-const int LookupTable::_defaultValue = -1;
+//http://stackoverflow.com/questions/3749660/how-to-resize-array-in-c

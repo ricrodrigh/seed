@@ -23,64 +23,57 @@ const String VALUE_D = "dVal";
 void setup()   {
   // initialize serial:
   Serial.begin(9600);
-  delay(1500);
+  delay(2500);
   
-  testGetSize();
-  getAllValues();
-  
-//  /testLookupTable();
+  testLookupTable();
 }
   
 void testLookupTable () {
-  Serial.print("Start: ");
-  Serial.println(freeMemory());
-  
-  testGetSize();
-  Serial.print("1: ");
-  Serial.println(freeMemory());
-  
-  simpleInit();
-  Serial.print("2: ");
-  Serial.println(freeMemory());
-  
+  Serial.println("=Printall=");
+  printAll();
+  Serial.println("=modify=");
+  modify();
+  Serial.println("=print after modify=");
+  printAll();
+
+  Serial.println("=Get All value=");
   getAllValues();
-  Serial.print("3: ");
-  Serial.println(freeMemory());
-  
-  Serial.print("Done: ");
-  Serial.println(freeMemory());
 } 
 
-void testGetSize() {
-  Serial.print("Size: ");
-  Serial.println(table.getSize());
-  delay(2000);
-}
-
-void simpleInit() {
-  String keySet[] = {VALUE_B, VALUE_C, VALUE_A, VALUE_D};
-  for(int i = 0; i < MAP_SIZE + 1; i++) {
-    Serial.print("Put: ");
-    Serial.print(keySet[i]);
-    Serial.print(" = ");
-    Serial.println(table.put(keySet[i]));
-  }
-  delay(2000);
-}
-
-void getValue() {
-  String keySet[] = {VALUE_A, VALUE_B, VALUE_C, VALUE_D};
-  for(int i = 0; i < MAP_SIZE + 1; i++) {
-    Serial.print("Get: ");
-    Serial.print(keySet[i]);
-    Serial.print(" = ");
-    Serial.println(table.getValue(keySet[i]));
-  }
-  delay(2000);
-}
-
 void getAllValues() {
-  table.printValues();  
+  Serial.println("Index\t Value");
+  for(int i = 0; i < MAP_SIZE + 1; i++) {
+      getOneValue(i);
+  }
+}
+
+void getOneValue(int indexPosition) {
+    int value = table.getValue(indexPosition);
+    Serial.print(indexPosition);
+    Serial.print("\t");
+    Serial.println(value);
+}
+
+void modify() {
+  String  inputKey = "modifyKey";
+  int newValue = 150;
+  table.setKey(inputKey);
+  Serial.println();
+  table.setValue(newValue);
+}
+
+void printAll() {
+  String  inputKey = "inputKey";
+  int tableSize = table.getSize();
+  String key = table.getKey(inputKey);
+  int value = table.getValue();
+  
+  Serial.println("Size\t Key \t Value");
+  Serial.print(tableSize);
+  Serial.print("\t");
+  Serial.print(key);
+  Serial.print("\t");
+  Serial.println(value);
 }
 
 void loop() {
