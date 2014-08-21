@@ -1,5 +1,4 @@
-#include <LookupTable.h>
-
+#include <HashMap.h>
 #include <MemoryFree.h>
 
 /*
@@ -15,21 +14,29 @@ boolean readingKey = true;
 /***********************************
 ** VALUES FOR THIS SEED COMPONENT **
 ************************************/
-const int MAP_SIZE = 3;
-LookupTable table(MAP_SIZE);
+const int HASH_SIZE = 3;
 
-const String keySet[MAP_SIZE] = {"b", "led1", "v"};
-const int values[MAP_SIZE] = {-1, 13, 10};
+char BLINK[] = "b";
+char LED_1[] = "led1";
+char MOTOR_PIN[] = "v";
+
+//storage 
+HashType<char*,int> hashRawArray[HASH_SIZE]; 
+//handles the storage [search,retrieve,insert]
+HashMap<char*,int> hashMap = HashMap<char*,int>( hashRawArray , HASH_SIZE ); 
 
 /*
-  b:{led1}={5} blink pin P five times (ex. b:led1:4, sending only b:4 does nothing since there is no key for b)
+  b:{led1}={5} blink pin P five times (ex. b:led1=10, sending only b:4 does nothing since there is no key for b)
   v:5 (vibrate N times)
 */
 
+/************************
+** Some default values **
+*************************/
 const int blinkDuration = 100;
-const int motorPin = 10;
 
 void setup()   {
+  int index = 0;
   // initialize serial:
   Serial.begin(9600);
     
@@ -37,23 +44,18 @@ void setup()   {
   commandKey.reserve(10);
   commandValue.reserve(10);
   
+  //Init led1
+  hashMap[index++](BLINK, 0);
+  hashMap[index++](LED_1, 13);
   pinMode(13, OUTPUT); //led1
-  pinMode(motorPin, OUTPUT); //v
-
-  testLookupTable();
+  
+  // Init vibrating motor
+  hashMap[index++](MOTOR_PIN, 10);
+  pinMode(10, OUTPUT); //v
+  
+  Serial.print("freeMemory()=");
+  Serial.println(freeMemory());
 }  
-  
-void testLookupTable () {
-  Serial.print("Size: ");
-  Serial.println(table.getSize());
-  
-  Serial.print("GetValue: a ");
-  Serial.println(table.getValue("a"));
-  
-  Serial.print("Put: a");
-  int value = 1;
-  Serial.println(table.put("a", &value));
-} 
 
 void loop() {
  
@@ -91,13 +93,14 @@ void loop() {
 void interpretCommand(String commandKey, String commandValue) {
   Serial.print("Interpreting: ");
   Serial.println(commandKey + ":" + commandValue);
-  int key = get(commandKey);
   
-  Serial.print("Key: ");
-  Serial.println(key);
+  byte keyIndex = get(commandKey); 
   
-  switch (key) {
-    case 0: //b
+  Serial.print("Foung Key in map: ");
+  Serial.println(keyIndex);
+  
+  switch (keyIndex) {
+    case 0: //blink
       if(containsNestedCommand(commandValue)){
         Serial.print("Do=>");
         interpretCommand(getNestedKey(commandValue),getNestedValue(commandValue));
@@ -105,9 +108,9 @@ void interpretCommand(String commandKey, String commandValue) {
       break;
     case 1: //led1
       Serial.println("Do=>led1");
-      blink(values[key], commandValue.toInt());
+      blink(hashMap.getValueOf(LED_1), commandValue.toInt());
       break;
-    case 2: //v
+    case 2: //vibrate motor
       Serial.println("Do=>Vibrate");
       vibrate(commandValue.toInt());
       break;
@@ -143,13 +146,11 @@ void vibrate(int times) {
   blink(13, times);
 }
 
-int get(String key) {
-  for(int i = 0; i < MAP_SIZE; i++) {
-    if(keySet[i] == key) {
-      return i;
-    }
-  }
-  return -1;
+byte get(String commandKey) {
+  int str_len = commandKey.length() +  1; 
+  char char_array[str_len];
+  commandKey.toCharArray(char_array, str_len);
+  return hashMap.getIndexOf(char_array);
 }
 
 /** Some cool pointer code
