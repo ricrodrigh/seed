@@ -10,6 +10,7 @@ String commandValue = "";         // a string to hold incoming data value
 boolean commandComplete = false;  // whether the string is complete
 boolean readingKey = true;
 
+unsigned int i = 9;
 
 /***********************************
 ** VALUES FOR THIS SEED COMPONENT **
@@ -146,24 +147,12 @@ void vibrate(int times) {
   blink(13, times);
 }
 
+/*
+ *
+*/
 byte get(String commandKey) {
   int str_len = commandKey.length() +  1; 
   char char_array[str_len];
   commandKey.toCharArray(char_array, str_len);
   return hashMap.getIndexOf(char_array);
 }
-
-/** Some cool pointer code
-void loop()
-{
-  byte data[2];
-
-  getdat(&data[0]);
-}
-
-void getdat(byte *pdata)
-{
-  pdata[0] = 'a';
-  pdata[1] = 'b';
-} 
-*/

@@ -1,0 +1,23 @@
+#######################################
+# Syntax Coloring Map For LEDs
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Led	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+getState	KEYWORD2
+turnOn	KEYWORD2
+turnOff	KEYWORD2
+toggle	KEYWORD2
+blink	KEYWORD2
+setPWMValue	KEYWORD2
+fadeIn	KEYWORD2
+fadeOut	KEYWORD2
+
